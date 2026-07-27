@@ -1,10 +1,11 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
 import { TodoDto } from './todo.dto';
 
 @Injectable()
 export class AppService {
+  private readonly logger = new Logger(AppService.name);
   private readonly todoIndexKey = 'todos:index';
 
   constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
@@ -33,8 +34,17 @@ export class AppService {
   }
 
   async createTodo(todo: TodoDto): Promise<TodoDto> {
-    await this.cacheManager.set(this.getTodoKey(todo.id), todo, 0);
+    const todoKey = this.getTodoKey(todo.id);
+    const existingTodo = await this.cacheManager.get<TodoDto>(todoKey);
+
+    await this.cacheManager.set(todoKey, todo, 0);
     await this.addTodoId(todo.id);
+
+    if (!existingTodo) {
+      this.logger.log(
+        `새로운 todo가 저장되었습니다. id=${todo.id}, title=${JSON.stringify(todo.title)}`,
+      );
+    }
 
     return todo;
   }
