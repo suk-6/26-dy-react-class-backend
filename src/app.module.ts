@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { TodosGateway } from './todos.gateway';
 
 @Module({
   imports: [
@@ -10,6 +11,6 @@ import { AppService } from './app.service';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TodosGateway],
 })
 export class AppModule {}

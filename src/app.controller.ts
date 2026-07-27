@@ -8,11 +8,15 @@ import {
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { TodoDto } from './todo.dto';
+import { TodosGateway } from './todos.gateway';
 
 @ApiTags('Todo')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly todosGateway: TodosGateway,
+  ) {}
 
   @Get('todos')
   @ApiOperation({
@@ -82,8 +86,12 @@ export class AppController {
     status: 400,
     description: '요청 body가 잘못됨',
   })
-  createTodo(@Body() todo: TodoDto): Promise<TodoDto> {
-    return this.appService.createTodo(todo);
+  async createTodo(@Body() todo: TodoDto): Promise<TodoDto> {
+    const createdTodo = await this.appService.createTodo(todo);
+
+    this.todosGateway.notifyTodosUpdated(await this.appService.getTodos());
+
+    return createdTodo;
   }
 
   @Delete('todo/:todoId')
@@ -106,7 +114,11 @@ export class AppController {
     status: 404,
     description: '요청한 todo ID에 해당하는 todo를 찾을 수 없음',
   })
-  deleteTodo(@Param('todoId') todoId: string): Promise<TodoDto> {
-    return this.appService.deleteTodo(todoId);
+  async deleteTodo(@Param('todoId') todoId: string): Promise<TodoDto> {
+    const deletedTodo = await this.appService.deleteTodo(todoId);
+
+    this.todosGateway.notifyTodosUpdated(await this.appService.getTodos());
+
+    return deletedTodo;
   }
 }
