@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -84,5 +84,29 @@ export class AppController {
   })
   createTodo(@Body() todo: TodoDto): Promise<TodoDto> {
     return this.appService.createTodo(todo);
+  }
+
+  @Delete('todo/:todoId')
+  @ApiOperation({
+    summary: 'todo 삭제',
+    description:
+      'todo ID를 이용해 저장된 todo를 삭제합니다. 삭제 후 WebSocket 구독자에게 todo 목록 변경을 알립니다.',
+  })
+  @ApiParam({
+    name: 'todoId',
+    description: '삭제할 todo 고유 ID',
+    example: 'todo-1',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'todo 삭제 성공. 삭제된 todo를 반환합니다.',
+    type: TodoDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '요청한 todo ID에 해당하는 todo를 찾을 수 없음',
+  })
+  deleteTodo(@Param('todoId') todoId: string): Promise<TodoDto> {
+    return this.appService.deleteTodo(todoId);
   }
 }

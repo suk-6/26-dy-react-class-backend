@@ -39,6 +39,20 @@ export class AppService {
     return todo;
   }
 
+  async deleteTodo(todoId: string): Promise<TodoDto> {
+    const todo = await this.getTodo(todoId);
+    const todoIds = await this.getTodoIds();
+
+    await this.cacheManager.del(this.getTodoKey(todoId));
+    await this.cacheManager.set(
+      this.todoIndexKey,
+      todoIds.filter((id) => id !== todoId),
+      0,
+    );
+
+    return todo;
+  }
+
   private async getTodoIds(): Promise<string[]> {
     return (await this.cacheManager.get<string[]>(this.todoIndexKey)) ?? [];
   }
