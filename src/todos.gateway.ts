@@ -26,10 +26,13 @@ export class TodosGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client: WebSocket,
     request: IncomingMessage,
   ): Promise<void> {
+    let email: string;
+
     try {
-      await this.authService.authenticateAccessToken(
+      const user = await this.authService.authenticateAccessToken(
         this.getAccessToken(request),
       );
+      email = user.email;
     } catch {
       client.close(1008, '인증이 필요합니다.');
       return;
@@ -37,7 +40,7 @@ export class TodosGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.authenticatedClients.add(client);
     this.logger.log(
-      `WebSocket 클라이언트가 연결되었습니다. ip=${this.getClientIp(request)}`,
+      `WebSocket 클라이언트가 연결되었습니다. email=${JSON.stringify(email)}`,
     );
     this.send(client, await this.appService.getTodos());
   }
@@ -74,25 +77,5 @@ export class TodosGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const url = new URL(request.url ?? '/', 'ws://localhost');
 
     return url.searchParams.get('accessToken') ?? undefined;
-  }
-
-  private getClientIp(request: IncomingMessage): string {
-    const forwardedFor = request.headers['x-forwarded-for'];
-
-    if (Array.isArray(forwardedFor)) {
-      return forwardedFor[0] ?? 'unknown';
-    }
-
-    if (forwardedFor) {
-      return forwardedFor.split(',')[0].trim();
-    }
-
-    const realIp = request.headers['x-real-ip'];
-
-    if (Array.isArray(realIp)) {
-      return realIp[0] ?? 'unknown';
-    }
-
-    return realIp ?? request.socket.remoteAddress ?? 'unknown';
   }
 }

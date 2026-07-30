@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -17,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { AccessTokenGuard } from './auth/access-token.guard';
+import type { AuthenticatedRequest } from './auth/auth.types';
 import { TodoDto } from './todo.dto';
 import { TodosGateway } from './todos.gateway';
 
@@ -102,8 +104,14 @@ export class AppController {
     status: 400,
     description: '요청 body가 잘못됨',
   })
-  async createTodo(@Body() todo: TodoDto): Promise<TodoDto> {
-    const createdTodo = await this.appService.createTodo(todo);
+  async createTodo(
+    @Body() todo: TodoDto,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<TodoDto> {
+    const createdTodo = await this.appService.createTodo(
+      todo,
+      request.user.email,
+    );
 
     this.todosGateway.notifyTodosUpdated(await this.appService.getTodos());
 

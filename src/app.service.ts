@@ -33,7 +33,7 @@ export class AppService {
     return todo;
   }
 
-  async createTodo(todo: TodoDto): Promise<TodoDto> {
+  async createTodo(todo: TodoDto, email: string): Promise<TodoDto> {
     const todoKey = this.getTodoKey(todo.id);
     const existingTodo = await this.cacheManager.get<TodoDto>(todoKey);
 
@@ -42,7 +42,7 @@ export class AppService {
 
     if (!existingTodo) {
       this.logger.log(
-        `새로운 todo가 저장되었습니다. id=${todo.id}, title=${JSON.stringify(todo.title)}`,
+        `새로운 todo가 저장되었습니다. email=${JSON.stringify(email)}, content=${JSON.stringify(todo.content)}`,
       );
     }
 
