@@ -20,8 +20,19 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Todo API')
-    .setDescription('Todo API')
+    .setDescription(
+      '수업용 이메일 인증 기반 Todo 관리 API. 이메일 인증 후 발급받은 access token을 Bearer 인증에 사용합니다.',
+    )
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: '이메일 인증 후 발급받은 access token',
+      },
+      'access-token',
+    )
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
 

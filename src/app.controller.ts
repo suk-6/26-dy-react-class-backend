@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -7,10 +16,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { AccessTokenGuard } from './auth/access-token.guard';
 import { TodoDto } from './todo.dto';
 import { TodosGateway } from './todos.gateway';
 
 @ApiTags('Todo')
+@ApiBearerAuth('access-token')
+@ApiResponse({
+  status: 401,
+  description: 'access token 또는 로그인 세션이 유효하지 않음',
+})
+@UseGuards(AccessTokenGuard)
 @Controller()
 export class AppController {
   constructor(
