@@ -42,14 +42,14 @@ export class AppService {
 
     if (!existingTodo) {
       this.logger.log(
-        `새로운 todo가 저장되었습니다. email=${JSON.stringify(email)}, content=${JSON.stringify(todo.content)}`,
+        `새로운 todo가 저장되었습니다. email=${JSON.stringify(email)}, title=${JSON.stringify(todo.title)}, content=${JSON.stringify(todo.content)}`,
       );
     }
 
     return todo;
   }
 
-  async deleteTodo(todoId: string): Promise<TodoDto> {
+  async deleteTodo(todoId: string, email: string): Promise<TodoDto> {
     const todo = await this.getTodo(todoId);
     const todoIds = await this.getTodoIds();
 
@@ -58,6 +58,10 @@ export class AppService {
       this.todoIndexKey,
       todoIds.filter((id) => id !== todoId),
       0,
+    );
+
+    this.logger.log(
+      `todo가 삭제되었습니다. email=${JSON.stringify(email)}, title=${JSON.stringify(todo.title)}, content=${JSON.stringify(todo.content)}`,
     );
 
     return todo;

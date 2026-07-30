@@ -138,8 +138,14 @@ export class AppController {
     status: 404,
     description: '요청한 todo ID에 해당하는 todo를 찾을 수 없음',
   })
-  async deleteTodo(@Param('todoId') todoId: string): Promise<TodoDto> {
-    const deletedTodo = await this.appService.deleteTodo(todoId);
+  async deleteTodo(
+    @Param('todoId') todoId: string,
+    @Req() request: AuthenticatedRequest,
+  ): Promise<TodoDto> {
+    const deletedTodo = await this.appService.deleteTodo(
+      todoId,
+      request.user.email,
+    );
 
     this.todosGateway.notifyTodosUpdated(await this.appService.getTodos());
 
